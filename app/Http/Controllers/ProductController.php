@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUpdateProductFormRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -10,7 +11,8 @@ class ProductController extends Controller
     private $product;
     private $Totalpage = 5;
 
-    public function __construct(Product $product) {
+    public function __construct(Product $product)
+    {
         $this->product = $product;
     }
     /**
@@ -41,7 +43,7 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreUpdateProductFormRequest $request)
     {
         $product = $this->product->create($request->all());
         return response()->json($product, 201);
@@ -55,7 +57,12 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        //
+        $product = $this->product->find($id);
+        if (!$product) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+
+        return response()->json($product);
     }
 
     /**
@@ -66,7 +73,6 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        //
     }
 
     /**
@@ -76,7 +82,7 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreUpdateProductFormRequest $request, $id)
     {
         $product = $this->product->find($id);
         if (!$product) {
@@ -94,6 +100,13 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $product = $this->product->find($id);
+        if (!$product) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+
+        $product->delete();
+
+        return response()->json(['success' => true, 204]);
     }
 }
