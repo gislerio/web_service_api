@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\v1;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUpdateCategoryFormRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -9,6 +10,7 @@ use Illuminate\Http\Request;
 class CategoryController extends Controller
 {
     private $category;
+    private $totalpage = 10;
 
     public function __construct(Category $category)
     {
@@ -61,5 +63,20 @@ class CategoryController extends Controller
         $category->delete();
 
         return response()->json(['success' => 'Category delete success'], 204);
+    }
+
+    public function products($id)
+    {
+        $category = $this->category->find($id);
+        if (!$category) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+
+        $products = $category->products()->paginate($this->totalpage);
+
+        return response()->json([
+            'category' => $category,
+            'products' => $products,
+        ]);
     }
 }

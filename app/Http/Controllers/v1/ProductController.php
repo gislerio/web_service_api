@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\v1;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUpdateProductFormRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -72,7 +74,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = $this->product->find($id);
+        $product = $this->product->with('category')->find($id);
         if (!$product) {
             return response()->json(['error' => 'Not found'], 404);
         }
@@ -103,7 +105,28 @@ class ProductController extends Controller
         if (!$product) {
             return response()->json(['error' => 'Not found'], 404);
         }
-        $product->update($request->all());
+
+        $data = $request->all();
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+
+            if ($product->image) {
+                if (Storage::exists("products/{$product->image}")) {
+                    Storage::delete("products/{$product->image}");
+                }
+            }
+            $name = Str::kebab($request->name);
+            $extension = $request->file('image')->extension();
+
+            $nameFile = "$name" . ".$extension";
+            $data['image'] = $nameFile;
+
+            $upload = $request->image->storeAs('products', $nameFile);
+
+            if (!$upload) {
+                return response()->json(['error' => 'Fail_Upload'], 500);
+            }
+        }
+        $product->update($data);
         return response()->json($product);
     }
 
@@ -119,7 +142,12 @@ class ProductController extends Controller
         if (!$product) {
             return response()->json(['error' => 'Not found'], 404);
         }
-
+        if ($product->image) {
+            if (Storage::exists("products/{$product->image}")) {
+                Storage::delete("products/{$product->image}");
+            }
+        }
+        
         $product->delete();
 
         return response()->json(['success' => true, 204]);

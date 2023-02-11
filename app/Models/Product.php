@@ -31,9 +31,11 @@ class Product extends Model
                 $query->where('description', "%{$description}%");
             }
         })->paginate($total) ;
-        //->toSql();
-        //$results->toSql();
-        //dd($results);
         return $results;
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }
