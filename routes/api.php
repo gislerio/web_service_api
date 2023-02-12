@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\v1\AuthApiController;
 use App\Http\Controllers\v1\CategoryController;
 use App\Http\Controllers\v1\ProductController;
 use Illuminate\Http\Request;
@@ -27,8 +28,13 @@ Route::put('categories/{id}', [CategoryController::class, 'update']);
 Route::delete('categories/{id}', [CategoryController::class, 'delete']); 
 */
 
-Route::prefix('v1')->group(function () {
+Route::post('v1/auth', [AuthApiController::class, 'authenticate']);
+Route::prefix('v1')->middleware('jwt.auth')->group(function () {
+    Route::post('auth-refresh', [AuthApiController::class, 'refreshToken']);
+    Route::get('me', [AuthApiController::class, 'getAuthenticatedUser']);
+    
     Route::get('categories/{id}/products', [CategoryController::class, 'products']);
+
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('products', ProductController::class);
 });

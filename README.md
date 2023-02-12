@@ -1,6 +1,6 @@
 ## Introdução
 
-API de produto criada em Laravel 8, com base no Curso Laravel Web Services Restful especializaTi
+API de produto criada em Laravel 8 e jwt-auth, com base no Curso Laravel Web Services Restful especializaTi
 
 ### Criação banco de dados
 `web_service` 
